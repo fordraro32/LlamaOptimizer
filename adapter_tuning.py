@@ -15,26 +15,28 @@ class AdapterTuning:
     def __init__(self, model, adapter_dim=64):
         self.model = model
         self.adapter_dim = adapter_dim
+        self.adapters = nn.ModuleDict()
         self.add_adapters()
 
     def add_adapters(self):
-        for name, module in self.model.named_modules():
+        for name, module in self.model.named_children():
             if isinstance(module, nn.Linear):
                 adapter = AdapterLayer(module.out_features, self.adapter_dim)
-                setattr(module, 'adapter', adapter)
+                self.adapters[name] = adapter
 
-    def adapter_forward(self, module, input, output):
-        return module.adapter(output)
+    def adapter_forward(self, name):
+        def hook(module, input, output):
+            return self.adapters[name](output)
+        return hook
 
     def enable_adapters(self):
-        for name, module in self.model.named_modules():
-            if hasattr(module, 'adapter'):
-                module.register_forward_hook(self.adapter_forward)
+        for name, module in self.model.named_children():
+            if name in self.adapters:
+                module.register_forward_hook(self.adapter_forward(name))
 
     def disable_adapters(self):
-        for name, module in self.model.named_modules():
-            if hasattr(module, 'adapter'):
-                module._forward_hooks.clear()
+        for module in self.model.modules():
+            module._forward_hooks.clear()
 
     def train_adapters(self, train_data, optimizer, num_epochs):
         self.enable_adapters()
