@@ -1,0 +1,41 @@
+ A NumPy version >=1.17.3 and <1.25.0 is required for this version of SciPy (detected version 1.25.2
+/home/ubuntu/.local/lib/python3.10/site-packages/huggingface_hub/file_download.py:1150: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+
+/home/ubuntu/.local/lib/python3.10/site-packages/torch/utils/checkpoint.py:429: UserWarning: torch.utils.checkpoint: please pass in use_reentrant=True or use_reentrant=False explicitly. The default value of use_reentrant will be updated to be False in the future. To maintain current behavior, pass use_reentrant=True. It is recommended that you use use_reentrant=False. Refer to docs for more details on the differences between the two variants.
+  warnings.warn(
+Epoch 1/10:   0%|                                                                                                                       | 0/50 [00:00<?, ?it/s]
+An error occurred during initialization: Expected all tensors to be on the same device, but found at least two devices, cpu and cuda:0! (when checking argument for argument mat1 in method wrapper_CUDA_addmm)
+Traceback (most recent call last):
+  File "/home/ubuntu/LlamaOptimizer/main.py", line 98, in <module>
+    main()
+  File "/home/ubuntu/LlamaOptimizer/main.py", line 70, in main
+    advanced_adapter_tuning.train_adapters(train_data, val_data, optimizer, num_epochs=10, batch_size=16, patience=3)
+  File "/home/ubuntu/LlamaOptimizer/adapter_tuning.py", line 110, in train_adapters
+    outputs = self.model(**inputs)
+  File "/home/ubuntu/.local/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/ubuntu/.local/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/ubuntu/.local/lib/python3.10/site-packages/transformers/models/gpt2/modeling_gpt2.py", line 1098, in forward
+    lm_logits = self.lm_head(hidden_states)
+  File "/home/ubuntu/.local/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/ubuntu/.local/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1581, in _call_impl
+    hook_result = hook(self, args, result)
+  File "/home/ubuntu/LlamaOptimizer/adapter_tuning.py", line 64, in hook
+    output = self.adapters[name](output)
+  File "/home/ubuntu/.local/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/ubuntu/.local/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/ubuntu/LlamaOptimizer/adapter_tuning.py", line 15, in forward
+    return self.up_project(self.activation(self.down_project(x))) + x
+  File "/home/ubuntu/.local/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/ubuntu/.local/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/ubuntu/.local/lib/python3.10/site-packages/torch/nn/modules/linear.py", line 114, in forward
+    return F.linear(input, self.weight, self.bias)
+RuntimeError: Expected all tensors to be on the same device, but found at least two devices, cpu and cuda:0! (when checking argument for argument mat1 in method wrapper_CUDA_addmm)
+ubuntu@207-211-185-153:~/LlamaOptimizer$

@@ -1,29 +1,19 @@
 import gradio as gr
 
-def create_ui(model, tokenizer, adapter_tuning, local_instructor, code_generator):
-    conversation_history = []
-
+def create_ui(memory_augmented_model, tokenizer, adapter_tuning, local_instructor, code_generator):
     def process_message(message, history):
-        conversation_history.append(("user", message))
-        
         # Determine the type of request based on the message content
         if message.lower().startswith("generate code:"):
             response = code_generator.generate_code(message[len("generate code:"):].strip())
         elif message.lower().startswith("explain code:"):
             response = code_generator.explain_code_generation(message[len("explain code:"):].strip())
         else:
-            response = generate_text(message)
+            response = memory_augmented_model.generate_response(message)
         
-        conversation_history.append(("assistant", response))
         return response
 
-    def generate_text(prompt, max_length=100):
-        input_ids = tokenizer.encode(prompt, return_tensors="pt")
-        output = model.generate(input_ids, max_length=max_length)
-        return tokenizer.decode(output[0], skip_special_tokens=True)
-
     def get_conversation_history():
-        return "\n".join([f"{'User' if role == 'user' else 'Assistant'}: {msg}" for role, msg in conversation_history])
+        return "\n".join([f"User: {m[0]}\nAssistant: {m[1]}" for m in memory_augmented_model.memory.memory])
 
     with gr.Blocks() as interface:
         gr.Markdown("# LLM Optimizer and Fine-Tuning Application")
