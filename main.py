@@ -15,17 +15,25 @@ from conversation_memory import ConversationMemory, MemoryAugmentedModel
 from plugin_system import PluginManager, GradientClippingPlugin
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
+
 
 def generate_text(model, tokenizer, prompt, max_length=100):
     input_ids = tokenizer.encode(prompt, return_tensors="pt").to(model.device)
     output = model.generate(input_ids, max_length=max_length)
     return tokenizer.decode(output[0], skip_special_tokens=True)
 
+
 def prepare_data(tokenizer, texts, max_length=128):
-    encodings = tokenizer(texts, truncation=True, padding="max_length", max_length=max_length, return_tensors="pt")
+    encodings = tokenizer(texts,
+                          truncation=True,
+                          padding="max_length",
+                          max_length=max_length,
+                          return_tensors="pt")
     encodings["labels"] = encodings["input_ids"].clone()
     return encodings
+
 
 def main():
     try:
@@ -39,6 +47,7 @@ def main():
         # Load the model
         logging.info("Loading model...")
         model, tokenizer = load_model()
+        model.to(device)  # Move the model to the appropriate device
         logging.info("Model loaded successfully")
 
         # Initialize conversation memory
@@ -50,12 +59,18 @@ def main():
         # Initialize plugin manager and register plugins
         logging.info("Initializing plugin manager...")
         plugin_manager = PluginManager()
-        plugin_manager.register_plugin("gradient_clipping", GradientClippingPlugin(max_norm=1.0))
+        plugin_manager.register_plugin("gradient_clipping",
+                                       GradientClippingPlugin(max_norm=1.0))
         logging.info("Plugin manager initialized")
 
         # Initialize advanced adapter tuning with new techniques
         logging.info("Initializing advanced adapter tuning...")
-        advanced_adapter_tuning = AdvancedAdapterTuning(model, adapter_dim=64, num_prefix_tokens=20, lora_rank=4, mixout_prob=0.1)
+        advanced_adapter_tuning = AdvancedAdapterTuning(model,
+                                                        adapter_dim=64,
+                                                        num_prefix_tokens=20,
+                                                        lora_rank=4,
+                                                        mixout_prob=0.1,
+                                                        device=device)
         logging.info("Advanced adapter tuning initialized")
 
         # Initialize local instructor
@@ -76,10 +91,16 @@ def main():
         # Load and prepare dataset
         logging.info("Loading and preparing dataset...")
         try:
-            dataset = load_dataset("wikitext", "wikitext-2-raw-v1", split="train")
-            texts = dataset["text"][:1000]  # Use a subset of 1000 examples for demonstration
-            train_texts, val_texts = train_test_split(texts, test_size=0.2, random_state=42)
-            
+            dataset = load_dataset("wikitext",
+                                   "wikitext-2-raw-v1",
+                                   split="train")
+            texts = dataset[
+                "text"][:
+                        1000]  # Use a subset of 1000 examples for demonstration
+            train_texts, val_texts = train_test_split(texts,
+                                                      test_size=0.2,
+                                                      random_state=42)
+
             train_data = prepare_data(tokenizer, train_texts)
             val_data = prepare_data(tokenizer, val_texts)
             logging.info("Dataset prepared successfully")
@@ -92,8 +113,13 @@ def main():
         try:
             # Apply all optimization plugins
             model = plugin_manager.apply_all_plugins(model)
-            
-            advanced_adapter_tuning.train_adapters(train_data, val_data, num_epochs=10, batch_size=16, patience=3, lr=5e-5)
+
+            advanced_adapter_tuning.train_adapters(train_data,
+                                                   val_data,
+                                                   num_epochs=10,
+                                                   batch_size=16,
+                                                   patience=3,
+                                                   lr=5e-5)
             logging.info("Fine-tuning complete")
         except Exception as e:
             logging.error(f"Error during fine-tuning: {str(e)}")
@@ -112,7 +138,9 @@ def main():
 
         # Create Gradio interface
         logging.info("Creating Gradio interface...")
-        iface = create_ui(memory_augmented_model, tokenizer, advanced_adapter_tuning, local_instructor, code_generator)
+        iface = create_ui(memory_augmented_model, tokenizer,
+                          advanced_adapter_tuning, local_instructor,
+                          code_generator)
         logging.info("Gradio interface created")
 
         # Launch the interface
@@ -122,6 +150,7 @@ def main():
     except Exception as e:
         logging.error(f"An error occurred during initialization: {str(e)}")
         raise
+
 
 if __name__ == "__main__":
     main()
