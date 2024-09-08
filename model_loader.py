@@ -7,6 +7,10 @@ def load_model(model_path="distilgpt2"):
     # Load tokenizer
     tokenizer = AutoTokenizer.from_pretrained(model_path)
     
+    # Set padding token
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token
+    
     # Check if GPU is available
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"Using device: {device}")
